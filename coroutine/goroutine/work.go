@@ -10,7 +10,7 @@ type workerWrapper struct {
 	jobChan    chan interface{}
 	outputChan chan interface{}
 	poolOpen   uint32
-	worker     Worker
+	worker     GoroutineWorker
 }
 
 func (wrapper *workerWrapper) Loop() {
@@ -29,7 +29,7 @@ func (wrapper *workerWrapper) Loop() {
 
 	for data := range wrapper.jobChan {
 		wrapper.outputChan <- wrapper.worker.Job(data)
-		for !wrapper.worker.TunnyReady() {
+		for !wrapper.worker.Ready() {
 			if atomic.LoadUint32(&wrapper.poolOpen) == 0 {
 				break
 			}
@@ -44,8 +44,8 @@ func (wrapper *workerWrapper) Loop() {
 }
 
 func (wrapper *workerWrapper) Open() {
-	if extWorker, ok := wrapper.worker.(TunnyExtendedWorker); ok {
-		extWorker.TunnyInitialize()
+	if extWorker, ok := wrapper.worker.(GoroutineExtendedWorker); ok {
+		extWorker.Initialize()
 	}
 
 	wrapper.readyChan = make(chan int)
@@ -75,13 +75,13 @@ func (wrapper *workerWrapper) Join() {
 		}
 	}
 
-	if extWorker, ok := wrapper.worker.(TunnyExtendedWorker); ok {
-		extWorker.TunnyTerminate()
+	if extWorker, ok := wrapper.worker.(GoroutineExtendedWorker); ok {
+		extWorker.Terminate()
 	}
 }
 
 func (wrapper *workerWrapper) Interrupt() {
-	if extWorker, ok := wrapper.worker.(TunnyInterruptable); ok {
-		extWorker.TunnyInterrupt()
+	if extWorker, ok := wrapper.worker.(GoroutineInterruptable); ok {
+		extWorker.Interrupt()
 	}
 }

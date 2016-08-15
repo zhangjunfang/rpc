@@ -1,4 +1,4 @@
-package gorotine
+package goroutine
 
 import (
 	"errors"
@@ -189,7 +189,7 @@ CreateCustomPool - Creates a pool for an array of custom workers. The custom wor
 must implement TunnyWorker, and may also optionally implement TunnyExtendedWorker and
 TunnyInterruptable.
 */
-func CreateCustomPool(customWorkers []Worker) *WorkPool {
+func CreateCustomPool(customWorkers []GoroutineWorker) *WorkPool {
 	pool := WorkPool{running: 0}
 
 	pool.workers = make([]*workerWrapper, len(customWorkers))
